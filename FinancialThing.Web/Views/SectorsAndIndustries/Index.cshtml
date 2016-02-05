@@ -1,0 +1,104 @@
+﻿@{
+    ViewBag.Title = "Sectors and Industries";
+    ViewBag.CurrentPage = "SectorsAndIndustries";
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+
+}
+@section styles
+{
+}
+
+@model FinancialThing.Models.SectorsAndIndustriesViewModel
+           
+
+<div class="right_col">
+    <h2 class="header">Sectors</h2>
+    <ul class="list" data-bind="template: {name:'listTemplate', foreach: sectors}"></ul>
+    <input data-bind="value: newSector.DisplayName" placeholder="name"/>
+    <input data-bind="value: newSector.Code" placeholder="code"/>
+    <button class="default_btn" data-bind="click: saveSector">Save sector</button>
+</div>
+
+<div class="left_col">
+    <h2 class="header">Industries</h2>
+    <ul class="list" data-bind="template: {name:'listTemplate', foreach: industries}"></ul>
+    <input data-bind="value: newIndustry.DisplayName" placeholder="name"/>
+    <input data-bind="value: newIndustry.Code" placeholder="code"/>
+    <div class="select_div">
+        <select class="" data-bind="template: {name:'industriesTemplate', foreach: sectors}, value: newIndustry.SectorCode"></select>
+    </div>
+    
+    <button class="default_btn" data-bind="click: saveIndustry">Save industry</button>
+</div>
+
+
+
+<script id="listTemplate" type="text/html">
+    <li>
+        <span data-bind="text: DisplayName"></span>
+    </li>
+</script>
+
+<script id="industriesTemplate" type="text/html">
+    <option data-bind="value: Code, text: DisplayName" />
+</script>
+
+<script>
+    function Sector(displayName, code) {
+        return {
+            Code: ko.observable(code),
+            DisplayName: ko.observable(displayName)
+        }
+    };
+
+    function Industry(displayName, code, sectorCode) {
+        return {
+            Code: ko.observable(code),
+            DisplayName: ko.observable(displayName),
+            SectorCode: ko.observable(sectorCode)
+        }
+    }
+
+    var vm = {
+        sectors: ko.observableArray(),
+        industries: ko.observableArray(),
+        newSector: new Sector("", ""),
+        newIndustry: new Industry("", "", ""),
+        saveSector: function () {
+            $.ajax({
+                url: "@Url.Action("SaveSector")",
+                type: "post",
+                data: ko.toJSON(vm.newSector),
+                contentType: "application/json",
+                success: function (sector) {
+                    vm.sectors.push(sector);
+                    vm.newSector.DisplayName("");
+                    vm.newSector.Code("");
+                }
+            });
+        },
+        saveIndustry: function () {
+            $.ajax({
+                url: "@Url.Action("SaveIndustry")",
+                type: "post",
+                data: ko.toJSON(vm.newIndustry),
+                contentType: "application/json",
+                success: function (sector) {
+                    vm.industries.push(sector);
+                    vm.newIndustry.DisplayName("");
+                    vm.newIndustry.Code("");
+                }
+            });
+        }
+    };
+
+    $(document).ready(function () {
+        $.getJSON("/SectorsAndIndustries/GetSectors", function (_sectors) {
+            vm.sectors = ko.observableArray(_sectors);
+            $.getJSON("/SectorsAndIndustries/GetIndustries", function (_industries) {
+                vm.industries = ko.observableArray(_industries);
+                ko.applyBindings(vm);
+            });
+        });
+    });
+</script>

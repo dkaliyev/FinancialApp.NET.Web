@@ -1,0 +1,117 @@
+﻿@using System.Globalization
+@using System.Text.RegularExpressions
+@model IEnumerable<FinancialThing.Models.DataViewModel>
+
+@{
+    ViewBag.Title = "Data";
+    ViewBag.CurrentPage = "Data";
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+    var companyList = Model.Select(x => x.CompanyViewModel).Where(c => c.Toggle.State);
+    var numYears = 3;
+
+    var inverses = new List<string>() { "Liabilities", "SGAAET", "UEI", "OOET", "TOE" };
+
+}
+@section styles
+{}
+<div id="companies_header">
+    @Html.EditorFor(m => companyList, "CompanyList")
+</div>
+<div class="row">
+    @foreach (var company in Model)
+    {
+        if (company.CompanyViewModel.Toggle.State && company.Financials != null)
+        {
+           
+
+            //var totalIncome = company.Financials.Pages.First(p => p.Dictionary.Code == "IncomeStatement").Statements.First(s => s.Dictionary.Code == "RevenueAndGross").Data.First(d => d.Dictionary.Code == "TR");
+            //var totalAssets = company.Financials.Pages.First(p => p.Dictionary.Code == "BalanceSh").Statements.First(s => s.Dictionary.Code == "Assets").Data.First(d => d.Dictionary.Code == "TA");
+
+            <div class="company @company.CompanyViewModel.Active" id="table-@company.CompanyViewModel.Id">
+                @if (company.Financials != null)
+                {
+                    foreach (var data in company.Financials.Pages.OrderBy(p => int.Parse(p.Dictionary.Order)))
+                    {
+                        var maxYear = data.MaxYear;
+                        var minYear = data.MinYear;
+                        var diff = maxYear - minYear;
+                        var count = Math.Min(diff + 1, numYears);
+                        var startYear = Math.Min(maxYear - numYears + 1, minYear);
+                        var years = Enumerable.Range(startYear, count).OrderByDescending(x => x);
+                        <div class="data">
+                            <div class="stmnt_class">@data.Dictionary.DisplayName</div>
+                            <div id="data_table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+
+                                            </th>
+                                            @foreach (var year in years)
+                                            {
+                                            <th>
+                                                @year
+                                            </th>
+                                            }
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var st in data.Statements.OrderBy(s => int.Parse(s.Dictionary.Order)))
+                                        {
+
+                                            <tr>
+                                                <td class="class_header">@st.Dictionary.DisplayName</td>
+                                            </tr>
+                                            foreach (var d in st.Data.OrderBy(d => int.Parse(d.Dictionary.Order)))
+                                            {
+                                                <tr order="@d.Dictionary.Order" class="data_row">
+                                                    <td class="data_col">@d.Dictionary.DisplayName</td>
+                                                    @foreach (var year in years)
+                                                    {
+                                                        var relativeValue = "";
+                                                        var value = d.Values.FirstOrDefault(v => v.Year == year.ToString()).DataValue;
+                                                        if (value != "--")
+                                                        {
+                                                            if (data.Dictionary.Code == "IncomeStatement")
+                                                            {
+                                                                relativeValue = (Convert.ToSingle(value) / company.Financials.TotalRevenue.First(r => r.Year == year).Value).ToString("P", CultureInfo.InvariantCulture);
+                                                            }
+                                                            if (data.Dictionary.Code == "BalanceSh")
+                                                            {
+                                                                relativeValue = (Convert.ToSingle(value) / company.Financials.TotalAssets.First(r => r.Year == year).Value).ToString("P", CultureInfo.InvariantCulture);
+                                                            }
+                                                        }
+
+                                                        <td class="data_col value">@value<br /><span class="relative_perc">@relativeValue</span></td>
+                                                    }
+                                                </tr>
+                                                <tr class="data_perc" data-toggle="0">
+                                                    <td class="label">Chg</td>
+                                                    @for (int i = 0; i < years.Count() - 1; i++)
+                                                    {
+
+                                                        var value = @d.Values.FirstOrDefault(v => v.Year == years.ToArray()[i].ToString()).DataValue;
+                                                        var previousValue = @d.Values.FirstOrDefault(v => v.Year == years.ToArray()[i + 1].ToString()).DataValue;
+                                                        var relative = (value != "--" && previousValue != "--") ? ((Convert.ToSingle(value)-Convert.ToSingle(previousValue))/Convert.ToSingle(previousValue)).ToString("P") : "";
+                                                        var inverse = inverses.Contains(d.Dictionary.Code) || inverses.Contains(st.Dictionary.Code);
+                                                        var arrowClass = relative.Contains("-") ? (inverse ? "down_green" : "down") : (inverse ? "up_red" : "up");
+                                                        var hide = relative != "" ? "perc_arrow " + arrowClass : "";
+                                                        <td class="data_col"><span class="@hide"></span><span class="data_perc_val">@relative</span></td>
+
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+        }
+
+    }
+</div>

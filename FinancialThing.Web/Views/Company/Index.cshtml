@@ -1,0 +1,137 @@
+﻿@using FinancialThing.Controllers
+@using FinancialThing.Models
+@model List<FinancialThing.Models.CompanyViewModel>
+
+
+@{
+    ViewBag.CurrentPage = "Company";
+    ViewBag.Title = "Company";
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+}
+@section styles
+{
+}
+<table class="companies_table">
+    <thead>
+        <tr>
+            <th class="name">Company name</th>
+            <th>Display?</th>
+            <th>Generate data</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (var i = 0; i < Model.Count(); i++)
+        {
+            @Html.Partial("Partial/_Company", Model[i])
+        }
+
+    </tbody>
+</table>
+
+<table class="shifted">
+    <tbody>
+        <tr>
+            <td>
+                <a class="button blink" onclick="addCompany();">Add new</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="shifted">
+    <tbody>
+        <tr>
+            <td>
+                <a class="button blink" onclick="toggle(1)">Select all</a> <a class="button" onclick="toggle(0)">Unselect all</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div id="overlay_blur" class="normal">
+
+</div>
+<div class="overlay hide">
+    <div class="bar">
+        <img class="close" src="~/Content/images/close.jpg" onclick="closeOverlay()" />
+    </div>
+    <div class="content">
+        <div class="row">
+            <div class="form-group">
+                <label for="company_name">Company name</label>
+                <input type="text" class="form-control text" id="company_name" placeholder="e.g. IMT" data-bind="value: newCompany.DisplayName" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="no-padding form-group"><label for="industry">Stock exchange</label></div>
+            <div class="form-group select_div">
+                <select id="exch_name" data-bind="remoteOptions:{url:'@Url.Action("GetExchanges")'}, optionsText: 'DisplayName', value: exchange"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="no-padding form-group"><label for="sector">Sector</label></div>
+            <div class="form-group select_div">
+                <select id="sector" class="" name="Sector" data-bind="remoteOptions:{url:'@Url.Action("GetSectors", "SectorsAndIndustries")'}, optionsText: 'DisplayName', value:sector"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="no-padding form-group"><label for="industry">Industry</label></div>
+            <div class="form-group select_div">
+                <select id="industry" class="" name="Industry" data-bind="remoteOptions: {url:'@Url.Action("GetIndustriesBySector", "SectorsAndIndustries")', parameters: {sector: sectorCode}}, optionsText: 'DisplayName', value: industry"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <span class="default" data-bind="click: saveComapny">Add</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#overlay_blur').height($('html').height());
+        $('#overlay_blur').width($('html').width());
+
+        var vm = {
+            sector: ko.observable(),
+            industry: ko.observable(),
+            exchange: ko.observable(),
+
+            saveComapny: function () {
+                $(".button").addClass("disabled");
+                toastr.info("Adding new companing", "Please wait...", { timeOut: 1500 });
+
+                $.ajax({
+                    url: "@Url.Action("AddCompany")",
+                    type: "post",
+                    data: ko.toJSON(vm.newCompany),
+                    contentType: "application/json",
+                    success: function (res) {
+                        toastr.success("Company added.", "Success!", { timeOut: 2000 });
+                        $(".button").removeClass("disabled");
+                        $('.companies_table>tbody').append(res);
+                        closeOverlay();
+                    },
+                    error: function () {
+                        toastr.error("There was internal error", "Oops!", { timeOut: 2000 });
+                        $(".button").removeClass("disabled");
+                    }
+                });
+            }
+        };
+
+        vm.sectorCode = ko.computed(function () {
+            return (vm.sector() || {}).Code;
+        });
+
+        vm.newCompany = {
+            DisplayName: ko.observable(""),
+            StockExchange: vm.exchange,
+            Sector: vm.sector,
+            Industry: vm.industry
+        }
+
+        ko.applyBindings(vm);
+    });
+
+</script>

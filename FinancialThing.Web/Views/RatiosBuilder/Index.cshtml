@@ -1,0 +1,156 @@
+﻿@model FinancialThing.Models.RatioViewModel
+
+@{
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+    ViewBag.Title = "Ratios builder";
+    ViewBag.CurrentPage = "RatiosBuilder";
+
+    var operations = new List<string>() { "(", ")", "+", "-", "*", "/", "AVG" };
+
+    var pages = new List<string>() { "BalanceSh", "CashFlow", "IncomeStatement" };
+
+    var statements = new List<string>()
+    {
+        "Assets", "Liabilities", "ShareholdersEquity",
+        "operations", "investing", "financing", "NetChangeInCash", "SupplementalIncome",
+        "RevenueAndGross", "OperatingExpenses", "IncomeTaxes", "EPS", "CommonStockDiv", "ProForma", "SupplInc", "NormalizedIncome"
+    };
+
+    var groupped = Model.Dictionary.GroupBy(d => d.ParentCode);
+
+
+}
+
+@section styles
+{
+    <link rel="stylesheet" type="text/css" href="~/Content/dragula.min.css" />
+    <link href="~/Content/opentip.css" rel="stylesheet" type="text/css" />
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/ratios")
+}
+
+<table class="companies_table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Formula
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ratio in Model.Ratios)
+        {
+            <tr>
+                <td>@ratio.Name</td>
+                <td>@ratio.Formula</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<table class="shifted">
+    <tbody>
+        <tr>
+            <td><button type="button" onclick="generateRatios();">Build ratios</button></td>
+        </tr>
+    </tbody>
+</table>
+<table class="shifted">
+    <tbody>
+        <tr>
+            <td>
+                <a class="button blink" onclick="addCompany();">Add new</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="overlay_blur" class="normal">
+
+</div>
+<div class="overlay hide ratios">
+    <div class="bar">
+        <img class="close" src="~/Content/images/close.jpg" onclick=" return closePopup();" />
+    </div>
+    <div class="content">
+        <div id="left_pane">
+            <div class="row">
+                <div class="form-group">
+                    <label for="ratio_name">Ratio name</label>
+                    <input type="text" class="form-control text" id="ratio_name" placeholder="e.g. Current ratio" />
+                </div>
+            </div>
+            <div class="row"><div id="formula_input"></div></div>
+            <div class="row">
+                <div class="form-group">
+                    <a class="button blink" onclick="return addRatio();">Add</a>
+                </div>
+            </div>
+
+        </div>
+        <div id="right_pane">
+            <div class="row">
+                <div class="select_div">
+                    <select id="section_selector">
+                        @foreach (var k in groupped)
+                        {
+                            <option value="@k.Key">@k.Key</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="cont" id="container">
+                    @foreach (var k in groupped)
+                    {
+                        <div class="gragabble group_section hide" data-code="@k.Key">
+                            @foreach (var datum in k)
+                            {
+                                <div class="ratio element" data-code="@datum.Code" data-ot="@datum.DisplayName">@(string.Format("{0}...", datum.DisplayName.Substring(0, 5)))</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <br />
+            <div class="row gragabble">
+                @foreach (var oper in operations)
+                {
+                    <div class="operation element" data-code="@oper">@oper</div>
+                }
+            </div>
+            <br />
+            <div class="gragabble">
+                <div class="input element"><input class="inpt" /></div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/drag")
+@Scripts.Render("~/bundles/tooltip")
+<script>
+
+
+    $(document).ready(function () {
+        $('#overlay_blur').height($('html').height());
+        $('#overlay_blur').width($('html').width());
+
+        currentElement = $($(".group_section")[0]);
+
+        currentElement.removeClass("hide").addClass("show");
+
+        currentElemId = currentElement.attr("data-code");
+
+        $("#section_selector").change(function () {
+            $("div[data-code=" + currentElemId + "]").removeClass("show").addClass("hide");
+            currentElemId = $(this).val();
+            console.log(currentElemId);
+            $("div[data-code=" + currentElemId + "]").removeClass("hide").addClass("show");
+        });
+    });
+</script>

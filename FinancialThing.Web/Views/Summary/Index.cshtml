@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "Summary";
+    ViewBag.CurrentPage = "Summary";
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+}
+@section styles
+{
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/d3")
+}
+
+@model FinancialThing.Models.SummaryViewModel
+
+<table class="companies_table">
+    <thead>
+        <tr data-bind="template: {name:'tableHeaderTemplate', foreach: headers}">
+        </tr>
+    </thead>
+    <tbody data-bind="template: {name:'tableDataTemplate', foreach: company_ratio}">
+    </tbody>
+
+</table>
+
+<div class="row">
+    
+</div>
+
+<script id="tableHeaderTemplate" type="text/html">
+    <th>
+        <span data-bind="text: DisplayName"></span>
+    </th>
+</script>
+
+<script id="tableDataTemplate" type="text/html">
+    <tr>
+        <td data-bind="text: CompanyName"></td>
+        <td data-bind="text: SectorName"></td>
+        <td data-bind="text: IndustryName"></td>
+        <!-- ko foreach: ratios -->
+        <td data-bind="text: $data"></td>
+        <!-- /ko -->
+    </tr>
+</script>
+
+<script>
+    var vm = {
+        headers: ko.observableArray(),
+        company_ratio: ko.observableArray()
+    }
+
+    $(document).ready(function() {
+        $.getJSON("/Summary/GetHeaders", function (_headers) {
+            vm.headers = ko.observableArray(_headers);
+
+            $.getJSON("/Summary/GetRatios", function (_ratios) {
+                vm.company_ratio = ko.observableArray(_ratios);
+                ko.applyBindings(vm);
+            });
+        });
+
+        
+    });
+
+</script>
