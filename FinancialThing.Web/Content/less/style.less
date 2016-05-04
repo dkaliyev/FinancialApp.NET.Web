@@ -1,5 +1,6 @@
 ﻿@import "colors";
 @import "toggle";
+@import "RatiosBuilder/style.less";
 
 @font-face {
     font-family: BebasReg;
@@ -36,6 +37,21 @@ h2, ul, select {
 
 ul {
     list-style-type: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.x.axis path {
+    display: none;
 }
 
 .sidebar {
@@ -156,10 +172,39 @@ ul {
     th {
         font-size: @table_header_font_size;
         padding-right: 40px;
+        cursor: pointer;
+
+        &.header {
+            background-repeat: no-repeat;
+            background-position: center right;
+            background-image: url("/Content/images/no_sort.png");
+            background-size: 25px 25px;
+            background-color: @dark;
+        }
 
         &.name {
             width: 250px;
             text-align: left;
+        }
+
+        &.headerSortUp span:before {
+            background-image: url("/Content/images/sort_desc.png");
+            background-size: 20px 19px;
+            display: inline-block;
+            width: 20px;
+            height: 16px;
+            background-repeat: no-repeat;
+            content: "";
+        }
+
+        &.headerSortDown span:before {
+            background-size: 20px 16px;
+            display: inline-block;
+            width: 20px;
+            height: 16px;
+            background-repeat: no-repeat;
+            content: "";
+            background-image: url("/Content/images/sort_asc.png");
         }
     }
 
@@ -512,6 +557,7 @@ h2 {
     background-image: url("/Content/images/select_chevron_down.png");
     background-position: 180px 50%;
     float: left;
+
     select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -520,7 +566,7 @@ h2 {
         border: 1px solid @light_menu;
         color: @menu_font;
         font-size: 18px;
-        padding:4px;
+        padding: 4px;
 
         &:focus {
             border: 2px solid #339933;
@@ -534,6 +580,7 @@ h2 {
     width: 100%;
     margin-top: 5px;
     margin-bottom: 5px;
+
     .no-padding {
         padding-right: 0px;
     }
@@ -562,6 +609,7 @@ span.default {
     position: absolute;
     top: 0px;
     left: 0px;
+
     &.show {
         display: inline-block;
     }

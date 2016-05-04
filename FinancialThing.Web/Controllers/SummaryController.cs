@@ -56,6 +56,14 @@ namespace FinancialThing.Controllers
             return new JsonResult() {Data = data};
         }
 
+        [AllowJsonGet]
+        public JsonResult GetGroupedRatios()
+        {
+            var data = new List<object>();
+            var ratios = _ratiovalueRepo.GetQuery().GroupBy(r => r.RatioId);
+            return null;
+        }
+
         //
         // GET: /Summary/
         public ActionResult Index()

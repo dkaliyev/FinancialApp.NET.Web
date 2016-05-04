@@ -61,7 +61,11 @@ namespace FinancialThing.DataAccess
 
         public void Delete(Ratio entity)
         {
-            throw new NotImplementedException();
+            if (entity != null)
+            {
+                var data = JsonConvert.SerializeObject(entity);
+                var res = _grabber.Delete(string.Format("{0}api/ratio/", ServiceUrl), data);
+            }
         }
 
         public void SaveOrUpdate(Ratio entity)

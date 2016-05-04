@@ -10,7 +10,8 @@ namespace FinancialThing
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js",
-                        "~/Scripts/jquery-ui-{version}.js"));
+                        "~/Scripts/jquery-ui-{version}.js",
+                        "~/Scripts/jquery.tablesorter.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
@@ -34,11 +35,14 @@ namespace FinancialThing
                       "~/Scripts/bootstrap.js",
                       "~/Scripts/respond.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/tabledata").Include(
+                "~/Scripts/datatables.min.js"));
+
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css",
                       "~/Content/sb-admin.css",
-                      "~/Content/toastr.css", 
+                      "~/Content/toastr.css",
                       "~/Content/dragula.min.cs",
                       "~/Content/font-awesome.min.css"));
 

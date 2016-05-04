@@ -65,6 +65,32 @@ function addRatio() {
     return false;
 }
 
+function getCode(formula) {
+
+    var start = formula.indexOf("Get(");
+    var end = formula.indexOf(")");
+
+    var op = "";
+    var nextStr = "";
+    var flag = formula[end - 1];
+    if (end != formula.length - 1) {
+        op = formula[end + 1];
+        nextStr = formula.substring(end + 2);
+    }
+
+    var innerString = formula.substring(start, end);
+    var innerStart = innerString.indexOf("[");
+    var innerEnd = innerString.indexOf("]");
+
+    var code = innerString.substring(innerStart+1, innerEnd);
+
+    return { code: code, operator: op, flag: flag, nextStr: nextStr };
+}
+
+function RemoveRatio(id) {
+    
+}
+
 function closePopup() {
     closeOverlay();
     $('#formula_input').empty();

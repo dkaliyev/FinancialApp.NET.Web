@@ -43,15 +43,7 @@
             </th>
         </tr>
     </thead>
-    <tbody>
-        @foreach (var ratio in Model.Ratios)
-        {
-            <tr>
-                <td>@ratio.Name</td>
-                <td>@ratio.Formula</td>
-            </tr>
-        }
-    </tbody>
+    <tbody data-bind="template: {name:'ratioDataTemplate', foreach: ratios}"></tbody>
 </table>
 <table class="shifted">
     <tbody>
@@ -133,6 +125,16 @@
 </div>
 @Scripts.Render("~/bundles/drag")
 @Scripts.Render("~/bundles/tooltip")
+
+<script id="ratioDataTemplate" type="text/html">
+    <tr>
+        <td data-bind="text: Name"></td>
+        <td data-bind="text: Formula"></td>
+        <td><div data-bind="click: $parent.removeRatio" class="remove_ratio"></div></td>
+        <td><button data-bind="click: $parent.editRatio">Edit</button></td>
+    </tr>
+</script>
+
 <script>
 
 
@@ -149,8 +151,54 @@
         $("#section_selector").change(function () {
             $("div[data-code=" + currentElemId + "]").removeClass("show").addClass("hide");
             currentElemId = $(this).val();
-            console.log(currentElemId);
             $("div[data-code=" + currentElemId + "]").removeClass("hide").addClass("show");
         });
+
+        function CurrentViewModel(_ratios) {
+            var self = this;
+            self.headers = ko.observableArray();
+            self.ratios = ko.observableArray(_ratios);
+
+            self.removeRatio = function(ratio) {
+                console.log(ratio.Id);
+                $.ajax({
+                    url: "/RatiosBuilder/RemoveRatio",
+                    data: ratio,
+                    method: "Post",
+
+                    success: function(resp) {
+                        self.ratios.remove(ratio);
+                    }
+                });
+            };
+
+            self.editRatio = function(ratio) {
+                console.log(ratio);
+                var formula = ratio.Formula;
+                var op = "";
+                var codes = [];
+                do {
+                    var res = getCode(formula);
+                    op = res.operator;
+                    formula = res.nextStr;
+                    codes.push(res.code);
+                } while (op != "");
+                console.log(codes);
+                //addCompany();
+            }
+        }
+
+
+
+        $.getJSON("/RatiosBuilder/GetRatios", function (_ratios) {
+            console.log(_ratios);
+            ko.applyBindings(new CurrentViewModel(_ratios["_ratios"]));
+
+            //$.getJSON("/Summary/GetRatios", function (_ratios) {
+            //    vm.company_ratio = ko.observableArray(_ratios);
+            //    ko.applyBindings(vm);
+            //});
+        });
+
     });
 </script>
