@@ -42,12 +42,12 @@ namespace FinancialThing.Controllers
             return View();
         }
 
-        public string GetCompanies()
-        {
-            var grabber = new FTDataGrabber();
-            var str = grabber.Grab("http://localhost:53357/api/company/");
-            return str;
-        }
+        //public string GetCompanies()
+        //{
+        //    var grabber = new FTDataGrabber();
+        //    var str = grabber.Grab("http://localhost:53357/api/company/");
+        //    return str;
+        //}
 
         
     }

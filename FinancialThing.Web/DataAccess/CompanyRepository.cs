@@ -8,10 +8,11 @@ using FinancialThing.DataAccess;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.Web.DataAccess
 {
-    public class CompanyRepository: ICompanyServiceRepository
+    public class CompanyRepository: ICompanyRepository
     {
         private readonly IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -20,49 +21,61 @@ namespace FinancialThing.Web.DataAccess
             _grabber = grabber;
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
-        public Company GetById(Guid id)
+        public async Task<Company> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Company>(_grabber.Grab(string.Format("{0}api/company/{1}", ServiceUrl, id)));
-            return data;
+            var resp = await _grabber.Get(string.Format("{0}api/company/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if(status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            return JsonConvert.DeserializeObject<Company>(status.Data);
         }
 
-        public IQueryable<Company> GetQuery()
+        public async Task<IQueryable<Company>> GetQuery()
         {
-            var data = JsonConvert.DeserializeObject<IEnumerable<Company>>(_grabber.Grab(string.Format("{0}api/company/", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/company/", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<IEnumerable<Company>>(status.Data);
             return data.AsQueryable();
         }
 
-        public Company FindBy(Expression<Func<Company, bool>> expression)
+        public async Task<Company> FindBy(Expression<Func<Company, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public Company Add(Company entity)
+        public async Task<Company> Add(Company entity)
         {
             if (entity != null)
             {
                 var data = JsonConvert.SerializeObject(entity);
-                var res = _grabber.Post(string.Format("{0}api/company/", ServiceUrl), data);
-                var deser = JsonConvert.DeserializeObject<Company>(res);
-                if (deser != null)
+                var res = await _grabber.Post(string.Format("{0}api/company/", ServiceUrl), data);
+                var status = JsonConvert.DeserializeObject<Status>(res);
+                if (status.StatusCode != "0")
                 {
-                    return deser;
+                    throw new Exception(status.Data);
                 }
+                return JsonConvert.DeserializeObject<Company>(status.Data);
             }
-            return null;
+            throw new Exception("Company is null");
         }
 
-        public void Update(Company entity)
+        public Task Update(Company entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(Company entity)
+        public Task Delete(Company entity)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(Company entity)
+        public Task SaveOrUpdate(Company entity)
         {
             throw new NotImplementedException();
         }

@@ -8,17 +8,18 @@ using FinancialThing.Filters;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.Controllers
 {
     public class CompanyController : Controller
     {
-        private readonly ICompanyServiceRepository _repo;
-        private readonly ISectorServiceRepository _sectorsRepo;
-        private readonly IIndustryServiceRepository _industryService;
-        private readonly IStockExchangeServiceRepository _stockRepo;
+        private readonly ICompanyRepository _repo;
+        private readonly IRepository<Sector, Guid> _sectorsRepo;
+        private readonly IRepository<Industry, Guid> _industryService;
+        private readonly IRepository<StockExchange, Guid> _stockRepo;
 
-        public CompanyController(ICompanyServiceRepository repo, IStockExchangeServiceRepository stockRepo, ISectorServiceRepository sectorRepo, IIndustryServiceRepository industryRepo)
+        public CompanyController(ICompanyRepository repo, IRepository<StockExchange, Guid> stockRepo, IRepository<Sector, Guid> sectorRepo, IRepository<Industry, Guid> industryRepo)
         {
             _repo = repo;
             _stockRepo = stockRepo;
@@ -27,7 +28,7 @@ namespace FinancialThing.Controllers
         }
         //
         // GET: /Company/
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             if(Session["states"] == null)
             {
@@ -35,7 +36,7 @@ namespace FinancialThing.Controllers
             }
             var states = Session["states"] as Dictionary<string, bool>;
 
-            var companies = _repo.GetQuery();
+            var companies = await _repo.GetQuery();
 
             var companyViewModels = new List<CompanyViewModel>();
             foreach (var company in companies)
@@ -58,11 +59,10 @@ namespace FinancialThing.Controllers
         }
 
         [AllowJsonGet]
-        public JsonResult GetExchanges()
+        public async Task<JsonResult> GetExchanges()
         {
-            var exchanges =
-                _stockRepo.GetQuery()
-                    .Select(e => new ExchangeViewModel() {DisplayName = e.DisplayName, Marker = e.Marker}).ToList();
+            var exchanges = await _stockRepo.GetQuery();
+            var data = exchanges.Select(e => new ExchangeViewModel() {DisplayName = e.DisplayName, Marker = e.Marker}).ToList();
             return new JsonResult() {Data = exchanges};
         }
 
@@ -94,21 +94,24 @@ namespace FinancialThing.Controllers
             Session["states"] = states;
         }
 
-        public ActionResult AddCompany(CompanyViewModel companyVm)
+        public async Task<ActionResult> AddCompany(CompanyViewModel companyVm)
         {
             if (companyVm != null)
             {
                 var newComp = new Company();
-                var sector = _sectorsRepo.GetQuery().FirstOrDefault(s => s.Code == companyVm.Sector.Code);
-                var industry = _industryService.GetQuery().FirstOrDefault(i => i.Code == companyVm.Industry.Code);
-                var exchange = _stockRepo.GetQuery().FirstOrDefault(e => e.Marker == companyVm.StockExchange.Marker);
+                var sectors = await _sectorsRepo.GetQuery();
+                var sector = sectors.FirstOrDefault(s => s.Code == companyVm.Sector.Code);
+                var industries = await _industryService.GetQuery();
+                var industry = industries.FirstOrDefault(i => i.Code == companyVm.Industry.Code);
+                var exchanges = await _stockRepo.GetQuery();
+                var exchange = exchanges.FirstOrDefault(e => e.Marker == companyVm.StockExchange.Marker);
 
                 newComp.Sector = sector;
                 newComp.Industry = industry;
                 newComp.StockExchange = exchange;
                 newComp.StockName = companyVm.DisplayName;
 
-                newComp = _repo.Add(newComp);
+                newComp = await _repo.Add(newComp);
                 if (newComp != null)
                 {
                     var states = Session["states"] as Dictionary<string, bool>;

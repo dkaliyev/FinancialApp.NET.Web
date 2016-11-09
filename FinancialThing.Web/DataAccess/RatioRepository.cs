@@ -7,10 +7,11 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class RatioRepository : IRatioServiceRepository
+    public class RatioRepository : IRepository<Ratio, Guid>
     {
         private readonly IDataGrabber _grabber;
 
@@ -22,53 +23,65 @@ namespace FinancialThing.DataAccess
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
 
-        public Ratio GetById(Guid id)
+        public async Task<Ratio> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Ratio>(_grabber.Grab(string.Format("{0}api/ratio/{1}", ServiceUrl, id)));
+            var resp = await _grabber.Get(string.Format("{0}api/ratio/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<Ratio>(status.Data);
             return data;
         }
 
-        public IQueryable<Ratio> GetQuery()
+        public async Task<IQueryable<Ratio>> GetQuery()
         {
-            var data = JsonConvert.DeserializeObject<IEnumerable<Ratio>>(_grabber.Grab(string.Format("{0}api/ratio", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/ratio", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<IEnumerable<Ratio>>(status.Data);
             return data.AsQueryable();
         }
 
-        public Ratio FindBy(Expression<Func<Ratio, bool>> expression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Ratio Add(Ratio entity)
+        public async Task<Ratio> Add(Ratio entity)
         {
             if (entity != null)
             {
                 var data = JsonConvert.SerializeObject(entity);
-                var res = _grabber.Post(string.Format("{0}api/ratio/", ServiceUrl), data);
-                var deser = JsonConvert.DeserializeObject<Ratio>(res);
-                if (deser != null)
+                var res =  await _grabber.Post(string.Format("{0}api/ratio/", ServiceUrl), data);
+                var status = JsonConvert.DeserializeObject<Status>(res);
+                if (status.StatusCode != "0")
                 {
-                    return deser;
+                    throw new Exception(status.Data);
                 }
             }
             return null;
         }
 
-        public void Update(Ratio entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(Ratio entity)
+        public async Task Delete(Ratio entity)
         {
             if (entity != null)
             {
                 var data = JsonConvert.SerializeObject(entity);
-                var res = _grabber.Delete(string.Format("{0}api/ratio/", ServiceUrl), data);
+                var res = await _grabber.Delete(string.Format("{0}api/ratio/", ServiceUrl), data);
             }
         }
 
-        public void SaveOrUpdate(Ratio entity)
+        public Task<Ratio> FindBy(Expression<Func<Ratio, bool>> expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SaveOrUpdate(Ratio entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(Ratio entity)
         {
             throw new NotImplementedException();
         }

@@ -7,10 +7,11 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class SectorRepository:ISectorServiceRepository
+    public class SectorRepository:IRepository<Sector, Guid>
     {
         private readonly IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -21,49 +22,53 @@ namespace FinancialThing.DataAccess
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
 
-        public Sector GetById(Guid id)
+        public async Task<Sector> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Sector>(_grabber.Grab(string.Format("{0}api/sector/{1}", ServiceUrl, id)));
+            var resp = await _grabber.Get(string.Format("{0}api/sector/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            var data = JsonConvert.DeserializeObject<Sector>(status.Data);
             return data;
         }
 
-        public IQueryable<Sector> GetQuery()
+        public async Task<IQueryable<Sector>> GetQuery()
         {
-            var data = JsonConvert.DeserializeObject<IEnumerable<Sector>>(_grabber.Grab(string.Format("{0}api/sector/", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/sector/", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            var data = JsonConvert.DeserializeObject<IEnumerable<Sector>>(status.Data);
             return data.AsQueryable();
         }
 
-        public Sector FindBy(Expression<Func<Sector, bool>> expression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Sector Add(Sector entity)
+        public async Task<Sector> Add(Sector entity)
         {
             if (entity != null)
             {
                 var data = JsonConvert.SerializeObject(entity);
-                var res = _grabber.Post(string.Format("{0}api/sector/", ServiceUrl), data);
-                var deser = JsonConvert.DeserializeObject<Sector>(res);
-                if (deser != null)
+                var res = await _grabber.Post(string.Format("{0}api/sector/", ServiceUrl), data);
+                var status = JsonConvert.DeserializeObject<Status>(res);
+                if (status.StatusCode != "0")
                 {
-                    return deser;
+                    throw new Exception(status.Data);
                 }
             }
             return null;
         }
 
-        public void Update(Sector entity)
+        public Task Delete(Sector entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(Sector entity)
+        public Task<Sector> FindBy(Expression<Func<Sector, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(Sector entity)
+        public Task SaveOrUpdate(Sector entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(Sector entity)
         {
             throw new NotImplementedException();
         }

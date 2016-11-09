@@ -9,20 +9,21 @@ using FinancialThing.Filters;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Microsoft.Ajax.Utilities;
+using System.Threading.Tasks;
 
 namespace FinancialThing.Controllers
 {
     public class RatiosBuilderController : Controller
     {
-        private IDictionaryServiceRepository _dictionaryServiceRepository;
+        private IRepository<Dictionary, Guid> _dictionaryServiceRepository;
 
-        private IRatioServiceRepository _ratioServiceRepository;
+        private IRepository<Ratio, Guid> _ratioServiceRepository;
 
-        private IRatioValueServiceRepository _ratioValueRepo;
+        private IRepository<RatioValue, Guid> _ratioValueRepo;
 
 
-        public RatiosBuilderController(IDictionaryServiceRepository dictionaryServiceRepository, IRatioServiceRepository ratioServiceRepository,
-            IRatioValueServiceRepository ratioValueRepo)
+        public RatiosBuilderController(IRepository<Dictionary, Guid> dictionaryServiceRepository, IRepository<Ratio, Guid> ratioServiceRepository,
+            IRepository<RatioValue, Guid> ratioValueRepo)
         {
             _dictionaryServiceRepository = dictionaryServiceRepository;
             _ratioServiceRepository = ratioServiceRepository;
@@ -30,39 +31,41 @@ namespace FinancialThing.Controllers
         }
         //
         // GET: /Ratios/
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             var pages = new List<string>() { "FI", "BalanceSh", "CashFlow", "IncomeStatement" };
-            var dics = _dictionaryServiceRepository.GetQuery().Where(d => !pages.Contains(d.ParentCode)).AsEnumerable();
-            var ratios = _ratioServiceRepository.GetQuery().AsEnumerable();
+            var dics = await _dictionaryServiceRepository.GetQuery();
+            var dictionaries = dics.Where(d => !pages.Contains(d.ParentCode)).AsEnumerable();
+            var ratios = await _ratioServiceRepository.GetQuery();
 
             var vm = new RatioViewModel()
             {
                 Ratios = ratios,
-                Dictionary = dics
+                Dictionary = dictionaries
             };
 
             return View(vm);
         }
 
         [AllowJsonGet]
-        public JsonResult GetRatios()
+        public async Task<JsonResult> GetRatios()
         {
-            var ratios = _ratioServiceRepository.GetQuery().ToList();
+            var ratios = await _ratioServiceRepository.GetQuery();
             return new JsonResult() { Data = new { _ratios = ratios } };
         }
 
-        public JsonResult GetDictionary()
+        public async Task<JsonResult> GetDictionary()
         {
             var pages = new List<string>() { "FI", "BalanceSh", "CashFlow", "IncomeStatement" };
-            var dics = _dictionaryServiceRepository.GetQuery().Where(d => !pages.Contains(d.ParentCode)).ToList();
+            var dics = await _dictionaryServiceRepository.GetQuery();
+            var dictionaries = dics.Where(d => !pages.Contains(d.ParentCode)).ToList();
             return new JsonResult() { Data = new { _dics = dics } };
         }
 
         [HttpPost]
-        public JsonResult AddRatio(Ratio ratio)
+        public async Task<JsonResult> AddRatio(Ratio ratio)
         {
-            var res = _ratioServiceRepository.Add(ratio);
+            var res = await _ratioServiceRepository.Add(ratio);
             var status = "fail";
             if (res != null)
                 status = "success";
@@ -70,16 +73,16 @@ namespace FinancialThing.Controllers
         }
 
         [HttpPost]
-        public JsonResult RemoveRatio(Ratio ratio)
+        public async Task<JsonResult> RemoveRatio(Ratio ratio)
         {
-            _ratioServiceRepository.Delete(ratio);
+            await _ratioServiceRepository.Delete(ratio);
             return new JsonResult { Data = new { _status = "done" } };
         }
 
         [HttpPost]
-        public JsonResult BuildRatios()
+        public async Task<JsonResult> BuildRatios()
         {
-            _ratioValueRepo.Add(null);
+            await _ratioValueRepo.Add(null);
             return new JsonResult { Data = new { _status = "done" } };
         }
     }

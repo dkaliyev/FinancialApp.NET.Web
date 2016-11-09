@@ -7,16 +7,17 @@ using System.Web.Mvc;
 using FinancialThing.DataAccess;
 using FinancialThing.Filters;
 using FinancialThing.Models;
+using System.Threading.Tasks;
 
 namespace FinancialThing.Controllers
 {
     public class SectorsAndIndustriesController : Controller
     {
-        private ISectorServiceRepository _sectorRepo;
-        private IIndustryServiceRepository _industryRepo;
+        private IRepository<Sector, Guid> _sectorRepo;
+        private IRepository<Industry, Guid> _industryRepo;
 
-        public SectorsAndIndustriesController(ISectorServiceRepository sectorRepo,
-            IIndustryServiceRepository industryRepo)
+        public SectorsAndIndustriesController(IRepository<Sector, Guid> sectorRepo,
+            IRepository<Industry, Guid> industryRepo)
         {
             _sectorRepo = sectorRepo;
             _industryRepo = industryRepo;
@@ -30,40 +31,42 @@ namespace FinancialThing.Controllers
         }
 
         [AllowJsonGet]
-        public JsonResult GetIndustries()
+        public async Task<JsonResult> GetIndustries()
         {
-            var industries = _industryRepo.GetQuery();
+            var industries = await _industryRepo.GetQuery();
             var Industries = industries.Select(i => new IndustriesViewModel() {DisplayName = i.DisplayName, Code = i.Code}).ToList();
             return new JsonResult() {Data = Industries};
         }
 
         [AllowJsonGet]
-        public JsonResult GetIndustriesBySector(string sector)
+        public async Task<JsonResult> GetIndustriesBySector(string sector)
         {
-            var industries = _industryRepo.GetQuery().Where(i=>i.Sector.Code == sector || sector == "");
-            var Industries = industries.Select(i => new IndustriesViewModel() { DisplayName = i.DisplayName, Code = i.Code }).ToList();
+            var industries = await _industryRepo.GetQuery();
+            var inds = industries.Where(i=>i.Sector.Code == sector || sector == "");
+            var Industries = inds.Select(i => new IndustriesViewModel() { DisplayName = i.DisplayName, Code = i.Code }).ToList();
             return new JsonResult() { Data = Industries };
         }
 
         [AllowJsonGet]
-        public JsonResult GetSectors()
+        public async Task<JsonResult> GetSectors()
         {
-            var sectors = _sectorRepo.GetQuery();
+            var sectors = await _sectorRepo.GetQuery();
             var Sectors = sectors.Select(i => new SectorViewModel() { DisplayName = i.DisplayName, Code = i.Code }).ToList();
             return new JsonResult() {Data = Sectors};
         }
 
-        public JsonResult SaveSector(SectorViewModel sector)
+        public async Task<JsonResult> SaveSector(SectorViewModel sector)
         {
-            _sectorRepo.Add(new Sector() { Code = sector.Code, DisplayName = sector.DisplayName});
+            await _sectorRepo.Add(new Sector() { Code = sector.Code, DisplayName = sector.DisplayName});
             return new JsonResult() {Data = sector};
         }
 
         [HttpPost]
-        public JsonResult SaveIndustry(IndustriesViewModel industry)
+        public async Task<JsonResult> SaveIndustry(IndustriesViewModel industry)
         {
-            var sector = _sectorRepo.GetQuery().FirstOrDefault(s => s.Code == industry.SectorCode);
-            _industryRepo.Add(new Industry(){Code = industry.Code, DisplayName = industry.DisplayName, Sector = new Sector() {Id = sector.Id}});
+            var sector = await _sectorRepo.GetQuery();
+            var sec = sector.FirstOrDefault(s => s.Code == industry.SectorCode);
+             await _industryRepo.Add(new Industry(){Code = industry.Code, DisplayName = industry.DisplayName, Sector = new Sector() {Id = sec.Id}});
             return new JsonResult() {Data = industry};
         }
 

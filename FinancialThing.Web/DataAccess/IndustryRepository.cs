@@ -7,10 +7,11 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class IndustryRepository: IIndustryServiceRepository
+    public class IndustryRepository: IRepository<Industry, Guid>
     {
         private readonly IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -21,49 +22,61 @@ namespace FinancialThing.DataAccess
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
 
-        public Industry GetById(Guid id)
+        public async Task<Industry> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Industry>(_grabber.Grab(string.Format("{0}api/industry/{1}", ServiceUrl, id)));
+            var resp = await _grabber.Get(string.Format("{0}api/industry/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<Industry>(status.Data);
             return data;
         }
 
-        public IQueryable<Industry> GetQuery()
+        public async Task<IQueryable<Industry>> GetQuery()
         {
-            var data = JsonConvert.DeserializeObject<IEnumerable<Industry>>(_grabber.Grab(string.Format("{0}api/industry/", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/industry/", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<IEnumerable<Industry>>(status.Data);
             return data.AsQueryable();
         }
 
-        public Industry FindBy(Expression<Func<Industry, bool>> expression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Industry Add(Industry entity)
+        public async Task<Industry> Add(Industry entity)
         {
             if (entity != null)
             {
                 var data = JsonConvert.SerializeObject(entity);
-                var res = _grabber.Post(string.Format("{0}api/industry/", ServiceUrl), data);
-                var deser = JsonConvert.DeserializeObject<Industry>(res);
-                if (deser != null)
+                var res = await _grabber.Post(string.Format("{0}api/industry/", ServiceUrl), data);
+                var status = JsonConvert.DeserializeObject<Status>(res);
+                if (status.StatusCode != "0")
                 {
-                    return deser;
+                    throw new Exception(status.Data);
                 }
             }
             return null;
         }
 
-        public void Update(Industry entity)
+        public Task Delete(Industry entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(Industry entity)
+        public Task<Industry> FindBy(Expression<Func<Industry, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(Industry entity)
+        public Task SaveOrUpdate(Industry entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(Industry entity)
         {
             throw new NotImplementedException();
         }

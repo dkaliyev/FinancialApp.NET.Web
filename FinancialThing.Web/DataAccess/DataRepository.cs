@@ -7,10 +7,12 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
+using FinancialThing.DataAccess;
 
-namespace FinancialThing.DataAccess
+namespace FinancialThing.Web.DataAccess
 {
-    public class DataRepository: IDataServiceRepository    
+    public class DataRepository: IRepository<Company, Guid>    
     {
         private IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -21,42 +23,56 @@ namespace FinancialThing.DataAccess
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
 
-        public Company GetById(Guid id)
+        public async Task<Company> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Company>(_grabber.Grab(string.Format("{0}api/data/{1}", ServiceUrl, id)));
-            return data;
+            var resp = await _grabber.Get(string.Format("{0}api/data/{1}", ServiceUrl, id));
+            var data = JsonConvert.DeserializeObject<Status>(resp);
+            var company = JsonConvert.DeserializeObject<Company>(data.Data);
+            return company;
         }
 
-        public IQueryable<Company> GetQuery()
+        public async Task<IQueryable<Company>> GetQuery()
         {
-            var list = JsonConvert.DeserializeObject<IEnumerable<Company>>(_grabber.Grab(string.Format("{0}api/data/", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/data/", ServiceUrl));
+            var data = JsonConvert.DeserializeObject<Status>(resp);
+            var list = JsonConvert.DeserializeObject<IEnumerable<Company>>(data.Data);
             return list.AsQueryable();
         }
 
-        public Company FindBy(Expression<Func<Company, bool>> expression)
+        public Task<Company> FindBy(Expression<Func<Company, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public Company Add(Company entity)
+        public async Task<Company> Add(Company entity)
         {
-            _grabber.Put(string.Format("{0}api/data/", ServiceUrl), "");
+            var resp = await _grabber.Put(string.Format("{0}api/data/", ServiceUrl), "");
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if(status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
             return null;
         }
 
-        public void Update(Company entity)
+        public async Task SaveOrUpdate(Company entity)
+        {   
+            var resp = await _grabber.Put(string.Format("{0}api/data/{1}", ServiceUrl, entity.Id), "");
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+        }
+
+        public Task Delete(Company entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(Company entity)
+        public Task Update(Company entity)
         {
             throw new NotImplementedException();
-        }
-
-        public void SaveOrUpdate(Company entity)
-        {
-            _grabber.Put(string.Format("{0}api/data/{1}", ServiceUrl, entity.Id), "");
         }
     }
 }

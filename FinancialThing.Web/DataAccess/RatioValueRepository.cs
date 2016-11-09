@@ -7,10 +7,11 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class RatioValueRepository: IRatioValueServiceRepository
+    public class RatioValueRepository: IRepository<RatioValue, Guid>
     {
         private readonly IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -21,39 +22,41 @@ namespace FinancialThing.DataAccess
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
 
-        public RatioValue GetById(Guid id)
+        public async Task<IQueryable<RatioValue>> GetQuery()
         {
-            throw new NotImplementedException();
-        }
-
-        public IQueryable<RatioValue> GetQuery()
-        {
-            var data = JsonConvert.DeserializeObject<IEnumerable<RatioValue>>(_grabber.Grab(string.Format("{0}api/ratiovalue", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/ratiovalue", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            var data = JsonConvert.DeserializeObject<IEnumerable<RatioValue>>(status.Data);
             return data.AsQueryable();
         }
 
-        public RatioValue FindBy(Expression<Func<RatioValue, bool>> expression)
+        public async Task<RatioValue> Add(RatioValue entity)
         {
-            throw new NotImplementedException();
-        }
-
-        public RatioValue Add(RatioValue entity)
-        {
-            var res = _grabber.Post(string.Format("{0}api/ratiovalue/", ServiceUrl), null);
+            var res = await _grabber.Post(string.Format("{0}api/ratiovalue/", ServiceUrl), "");
             return new RatioValue();
         }
 
-        public void Update(RatioValue entity)
+        public Task Delete(RatioValue entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(RatioValue entity)
+        public Task<RatioValue> FindBy(Expression<Func<RatioValue, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(RatioValue entity)
+        public Task<RatioValue> GetById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SaveOrUpdate(RatioValue entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Update(RatioValue entity)
         {
             throw new NotImplementedException();
         }

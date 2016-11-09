@@ -7,6 +7,10 @@ namespace FinancialThing.Models
 {
     public class SummaryViewModel
     {
-        public IList<Company> Companies { get; set; } 
+        public string CompanyName { get; set; }
+
+        public string SectorName { get; set; }
+
+        public string IndustryName { get; set; }
     }
 }

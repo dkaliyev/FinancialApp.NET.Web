@@ -8,24 +8,25 @@ using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.Controllers
 {
     public class DataController : Controller
     {
-        private IDataServiceRepository _dataRepo;
+        private IRepository<Company, Guid> _dataRepo;
 
-        public DataController(IDataServiceRepository repo)
+        public DataController(IRepository<Company, Guid> repo)
         {
             _dataRepo = repo;
         }
         //
         // GET: /Data/
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             var states = Session["states"] as Dictionary<string, bool> ?? new Dictionary<string, bool>();
 
-            var data = _dataRepo.GetQuery();
+            var data = await _dataRepo.GetQuery();
             var dataViewModels = new List<DataViewModel>();
             foreach (var datum in data)
             {
@@ -55,16 +56,16 @@ namespace FinancialThing.Controllers
             return View(dataViewModels);
         }
 
-        public ActionResult GenerateAll()
+        public async Task<ActionResult> GenerateAll()
         {
-            _dataRepo.Add(null);
+            await _dataRepo.Add(null);
             return null;
         }
 
         [HttpPost]
-        public ActionResult Generate(string id)
+        public async Task<ActionResult> Generate(string id)
         {
-            _dataRepo.SaveOrUpdate(new Company(){Id=new Guid(id)});
+            await _dataRepo.SaveOrUpdate(new Company(){Id=new Guid(id)});
             return null;
         }
 	}

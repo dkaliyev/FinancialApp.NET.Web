@@ -29,7 +29,9 @@ namespace FinancialThing
 
             bundles.Add(new ScriptBundle("~/bundles/shared").Include(
                         "~/Scripts/shared.js",
-                        "~/Scripts/dragula.min.js"));
+                        "~/Scripts/dragula.min.js",
+                        "~/Scripts/react/react.js",
+                        "~/Scripts/react/react-dom.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.js",

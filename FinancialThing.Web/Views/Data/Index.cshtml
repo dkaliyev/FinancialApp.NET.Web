@@ -22,7 +22,7 @@
     {
         if (company.CompanyViewModel.Toggle.State && company.Financials != null)
         {
-           
+
 
             //var totalIncome = company.Financials.Pages.First(p => p.Dictionary.Code == "IncomeStatement").Statements.First(s => s.Dictionary.Code == "RevenueAndGross").Data.First(d => d.Dictionary.Code == "TR");
             //var totalAssets = company.Financials.Pages.First(p => p.Dictionary.Code == "BalanceSh").Statements.First(s => s.Dictionary.Code == "Assets").Data.First(d => d.Dictionary.Code == "TA");
@@ -49,9 +49,9 @@
                                             </th>
                                             @foreach (var year in years)
                                             {
-                                            <th>
-                                                @year
-                                            </th>
+                                                <th>
+                                                    @year
+                                                </th>
                                             }
 
                                         </tr>
@@ -71,18 +71,18 @@
                                                     {
                                                         var relativeValue = "";
                                                         var value = d.Values.FirstOrDefault(v => v.Year == year.ToString()).DataValue;
-                                                        if (value != "--")
-                                                        {
-                                                            if (data.Dictionary.Code == "IncomeStatement")
-                                                            {
-                                                                relativeValue = (Convert.ToSingle(value) / company.Financials.TotalRevenue.First(r => r.Year == year).Value).ToString("P", CultureInfo.InvariantCulture);
-                                                            }
-                                                            if (data.Dictionary.Code == "BalanceSh")
-                                                            {
-                                                                relativeValue = (Convert.ToSingle(value) / company.Financials.TotalAssets.First(r => r.Year == year).Value).ToString("P", CultureInfo.InvariantCulture);
-                                                            }
-                                                        }
+                                                        var totalRevenueVal = company.Financials.TotalRevenue.First(r => r.Year == year).Value;
+                                                        var totalAssetsValue = company.Financials.TotalAssets.First(r => r.Year == year).Value;
 
+                                                        if (data.Dictionary.Code == "IncomeStatement" && totalRevenueVal != 0)
+                                                        {
+                                                            relativeValue = (value / totalRevenueVal).ToString("P", CultureInfo.InvariantCulture);
+                                                        }
+                                                        if (data.Dictionary.Code == "BalanceSh" && totalAssetsValue !=0)
+                                                        {
+                                                            relativeValue = (value / totalAssetsValue).ToString("P", CultureInfo.InvariantCulture);
+                                                        }
+                                                        
                                                         <td class="data_col value">@value<br /><span class="relative_perc">@relativeValue</span></td>
                                                     }
                                                 </tr>
@@ -93,7 +93,7 @@
 
                                                         var value = @d.Values.FirstOrDefault(v => v.Year == years.ToArray()[i].ToString()).DataValue;
                                                         var previousValue = @d.Values.FirstOrDefault(v => v.Year == years.ToArray()[i + 1].ToString()).DataValue;
-                                                        var relative = (value != "--" && previousValue != "--") ? ((Convert.ToSingle(value)-Convert.ToSingle(previousValue))/Convert.ToSingle(previousValue)).ToString("P") : "";
+                                                        var relative = previousValue != 0 ? ((Convert.ToSingle(value) - Convert.ToSingle(previousValue)) / Convert.ToSingle(previousValue)).ToString("P") : "";
                                                         var inverse = inverses.Contains(d.Dictionary.Code) || inverses.Contains(st.Dictionary.Code);
                                                         var arrowClass = relative.Contains("-") ? (inverse ? "down_green" : "down") : (inverse ? "up_red" : "up");
                                                         var hide = relative != "" ? "perc_arrow " + arrowClass : "";

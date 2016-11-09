@@ -6,10 +6,11 @@ using System.Linq.Expressions;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class DictionaryRepository: IDictionaryServiceRepository
+    public class DictionaryRepository: IRepository<Dictionary, Guid>
     {
         private IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -19,39 +20,50 @@ namespace FinancialThing.DataAccess
             _grabber = grabber;
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
-        public Dictionary GetById(Guid id)
+        public async Task<Dictionary> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<Dictionary>(_grabber.Grab(string.Format("{0}api/dictionary/{1}", ServiceUrl, id)));
-            return data;
+            var response = await _grabber.Get(string.Format("{0}api/dictionary/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(response);
+            if(status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            return JsonConvert.DeserializeObject<Dictionary>(status.Data);
         }
 
-        public IQueryable<Dictionary> GetQuery()
+        public async Task<IQueryable<Dictionary>> GetQuery()
         {
-            var list = JsonConvert.DeserializeObject<IEnumerable<Dictionary>>(_grabber.Grab(string.Format("{0}api/dictionary/", ServiceUrl)));
+            var response = await _grabber.Get(string.Format("{0}api/dictionary/", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(response);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var list = JsonConvert.DeserializeObject<IEnumerable<Dictionary>>(status.Data);
             return list.AsQueryable();
         }
 
-        public Dictionary FindBy(Expression<Func<Dictionary, bool>> expression)
+        public Task<Dictionary> Add(Dictionary entity)
         {
             throw new NotImplementedException();
         }
 
-        public Dictionary Add(Dictionary entity)
+        public Task Delete(Dictionary entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Update(Dictionary entity)
+        public Task<Dictionary> FindBy(Expression<Func<Dictionary, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(Dictionary entity)
+        public Task SaveOrUpdate(Dictionary entity)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(Dictionary entity)
+        public Task Update(Dictionary entity)
         {
             throw new NotImplementedException();
         }

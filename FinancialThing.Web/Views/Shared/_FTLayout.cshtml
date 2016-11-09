@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Syncfusion.MVC.EJ;
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:svg="http://www.w3.org/2000/svg">
 <head>
@@ -6,6 +7,7 @@
     <link rel="stylesheet/less" type="text/css" href="~/Content/less/style.less" />
     <link rel="stylesheet" type="text/css" href="~/Content/toastr.css" />
     <link rel="stylesheet" type="text/css" href="~/Content/font-awesome.min.css" />
+    <link href="@Url.Content("~/Content/ej/web/ej.web.all.min.css")" rel="stylesheet" />
     @RenderSection("styles", false)
 
     <title>@ViewBag.Title</title>
@@ -16,7 +18,24 @@
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/jqueryval")
     @Scripts.Render("~/bundles/less")
-    @RenderSection("scripts", false);
+    <script src="@Url.Content("~/Scripts/jsrender.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.data.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.core.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.globalize.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.pager.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.scroller.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.waitingpopup.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.draggable.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.dropdownlist.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.autocomplete.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.radiobutton.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.accordion.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.checkbox.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.button.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.dialog.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/ej.grid.min.js")"></script>
+    @RenderSection("scripts", false)
+    @Html.EJ().ScriptManager()
 </head>
 <body>
     <div class="sidebar">

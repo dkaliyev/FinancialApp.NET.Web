@@ -7,10 +7,11 @@ using System.Web;
 using FinancialThing.Models;
 using FinancialThing.Utilities;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FinancialThing.DataAccess
 {
-    public class StockExchangeRepository: IStockExchangeServiceRepository
+    public class StockExchangeRepository: IRepository<StockExchange, Guid>
     {
         private IDataGrabber _grabber;
         private string ServiceUrl { get; set; }
@@ -20,39 +21,51 @@ namespace FinancialThing.DataAccess
             _grabber = grabber;
             ServiceUrl = ConfigurationManager.AppSettings["LocalServiceUrl"];
         }
-        public StockExchange GetById(Guid id)
+        public async Task<StockExchange> GetById(Guid id)
         {
-            var data = JsonConvert.DeserializeObject<StockExchange>(_grabber.Grab(string.Format("{0}api/stockexchange/{1}", ServiceUrl, id)));
+            var resp = await _grabber.Get(string.Format("{0}api/stockexchange/{1}", ServiceUrl, id));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if(status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var data = JsonConvert.DeserializeObject<StockExchange>(status.Data);
             return data;
         }
 
-        public IQueryable<StockExchange> GetQuery()
+        public async Task<IQueryable<StockExchange>> GetQuery()
         {
-            var list = JsonConvert.DeserializeObject<IEnumerable<StockExchange>>(_grabber.Grab(string.Format("{0}api/stockexchange/", ServiceUrl)));
+            var resp = await _grabber.Get(string.Format("{0}api/stockexchange/", ServiceUrl));
+            var status = JsonConvert.DeserializeObject<Status>(resp);
+            if (status.StatusCode == "1")
+            {
+                throw new Exception(status.Data);
+            }
+            var list = JsonConvert.DeserializeObject<IEnumerable<StockExchange>>(status.Data);
             return list.AsQueryable();
         }
 
-        public StockExchange FindBy(Expression<Func<StockExchange, bool>> expression)
+        public Task<StockExchange> Add(StockExchange entity)
         {
             throw new NotImplementedException();
         }
 
-        public StockExchange Add(StockExchange entity)
+        public Task Delete(StockExchange entity)
         {
             throw new NotImplementedException();
         }
 
-        public void Update(StockExchange entity)
+        public Task<StockExchange> FindBy(Expression<Func<StockExchange, bool>> expression)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(StockExchange entity)
+        public Task SaveOrUpdate(StockExchange entity)
         {
             throw new NotImplementedException();
         }
 
-        public void SaveOrUpdate(StockExchange entity)
+        public Task Update(StockExchange entity)
         {
             throw new NotImplementedException();
         }
