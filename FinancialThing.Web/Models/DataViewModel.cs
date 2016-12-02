@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace FinancialThing.Models
 {
     public class DataViewModel
     {
-        public CompanyViewModel CompanyViewModel { get; set; }
-
-        public Financials Financials { get; set; }
+        public List<DataCompanyViewModel> DataCompanyViewModels { get; set; }    
     }
 }

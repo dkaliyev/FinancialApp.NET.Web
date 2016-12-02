@@ -5,10 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using FinancialThing.Models;
 using System.Net.Http;
-using FinancialThing.Utilities;
 using System.Net.Http.Headers;
 
-namespace FinancialThing.Utilities
+namespace FinancialThing.Utilities.Web
 {
     public class AsyncHttpClient: IDataGrabber
     {

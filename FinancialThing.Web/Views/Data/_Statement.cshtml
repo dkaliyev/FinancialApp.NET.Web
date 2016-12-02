@@ -1,0 +1,25 @@
+﻿@using FinancialThing.Models;
+
+@model StatementViewModel
+    
+<table>
+    <caption>@Model.Name</caption>
+    <thead>
+    <tr>
+        <th></th>
+        @foreach (var year in Model.Years)
+        {
+            <th>@year</th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var data in Model.DataViewModels)
+    {
+        @Html.Partial("_Data", data)
+    }
+    </tbody>
+</table>
+
+
+

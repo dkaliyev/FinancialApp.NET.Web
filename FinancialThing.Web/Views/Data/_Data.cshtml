@@ -1,0 +1,27 @@
+﻿@using System.Globalization
+@using FinancialThing.Models;
+
+@model DataItemViewModel
+
+    <tr class="group_header">
+        <td>@Model.Name</td>
+    </tr>
+    @foreach (var data in Model.ValueViewModels)
+    {
+        var id = Guid.NewGuid().ToString();
+
+        <tr class="table_row" onclick="toggleRelative('@id')">
+            <td class="table_cell item_name">@data.Name</td>
+            @foreach (var value in data.Values)
+            {
+                <td class="table_cell">@value.ToString("C", CultureInfo.GetCultureInfo("en-US"))</td>
+            }
+        </tr>
+        <tr class="table_row" style="color: red; display: none" id="@id" data-state=false>
+            <td class="table_cell item_name">Relative value</td>
+            @foreach (var value in data.Values)
+            {
+                <td class="table_cell">@value.ToString("C", CultureInfo.GetCultureInfo("en-US"))</td>
+            }
+        </tr>
+    }

@@ -1,0 +1,14 @@
+﻿@using FinancialThing.Models;
+
+@model DataCompanyViewModel
+    
+<div style="width: 1500px; display: table-row">
+    @foreach (var statement in Model.StatementViewModels)
+    {
+        <div style="width: 33%; display: table-cell;">
+            @Html.Partial("_Statement", statement)
+        </div>
+    }
+</div>
+
+

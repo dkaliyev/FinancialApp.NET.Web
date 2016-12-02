@@ -55,10 +55,10 @@ ul {
 }
 
 .sidebar {
-    width: 12%;
+    width: 15%;
     height: 1000px;
     border-right: 1px solid @light_menu;
-    position: fixed;
+    position: absolute;
 }
 
 .show {
@@ -70,12 +70,24 @@ ul {
 }
 
 .main_container {
-    width: 85%;
+    /*width: 85%;
     margin-left: 12%;
     height: 800px;
-    float: left;
+    float: left;*/
+    position: absolute;
+    left: 16%;
     color: @menu_font;
-    padding-left: 40px;
+    width: 84%;
+
+    .inner_container {
+        overflow-x: scroll;
+        width: 100%;
+
+        table > caption {
+            font-family: BebasReg;
+            font-size: 30px;
+        }
+    }
 
     .data {
         float: left;
@@ -617,4 +629,13 @@ span.default {
     &.hide {
         display: none;
     }
+}
+
+.group_header {
+    font-family: BebasReg;
+    font-size: 20px;
+}
+
+.table_cell {
+    padding: 5px;
 }

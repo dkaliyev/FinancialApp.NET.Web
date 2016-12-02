@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FinancialThing.Utilities
+namespace FinancialThing.Utilities.Web
 {
     public interface IDataGrabber
     {

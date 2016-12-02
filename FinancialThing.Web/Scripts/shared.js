@@ -62,6 +62,15 @@ function toggle(dir) {
     });
 }
 
+function toggleRelative(id) {
+    var jqId = "#" + id;
+    //$(jqId).toggle(800);
+    var state = $(jqId).data("state");
+    state ? $(jqId).slideUp(400) : $(jqId).slideDown(400);
+    state = !state;
+    $(jqId).data("state", state);
+}
+
 function addCompany() {
     $('#overlay_blur').removeClass('normal');
     $('#overlay_blur').addClass('blured');

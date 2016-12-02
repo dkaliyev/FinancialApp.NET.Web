@@ -24,7 +24,8 @@ namespace FinancialThing
             var builder = new ContainerBuilder();
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
             builder.Register(x => new AsyncHttpClient()).As<IDataGrabber>().SingleInstance();
-            builder.Register(x => new CompanyRepository(x.Resolve<IDataGrabber>())).As<ICompanyRepository>().SingleInstance(); 
+            builder.Register(x => new CompanyRepository(x.Resolve<IDataGrabber>())).As<ICompanyRepository>().SingleInstance();
+            builder.Register(x => new ExpandedCompanyRepository(x.Resolve<IDataGrabber>())).As<IRepository<ExpandedCompany, Guid>>().SingleInstance();
             builder.Register(x => new DataRepository(x.Resolve<IDataGrabber>())).As<IRepository<Company, Guid>>().SingleInstance();
             builder.Register(x => new SectorRepository(x.Resolve<IDataGrabber>())).As<IRepository<Sector, Guid>>().SingleInstance();
             builder.Register(x => new IndustryRepository(x.Resolve<IDataGrabber>())).As<IRepository<Industry, Guid>>().SingleInstance(); 

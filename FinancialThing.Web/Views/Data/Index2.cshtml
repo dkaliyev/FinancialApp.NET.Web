@@ -1,0 +1,16 @@
+﻿@using FinancialThing.Models;
+
+@model DataViewModel
+
+@{
+    Layout = "~/Views/Shared/_FTLayout.cshtml";
+    ViewBag.Title = "Data";
+    ViewBag.CurrentPage = "Data";
+}
+
+<div class="inner_container">
+    @foreach (var company in Model.DataCompanyViewModels)
+    {
+        @Html.Partial("_Company", company)
+    }
+</div>

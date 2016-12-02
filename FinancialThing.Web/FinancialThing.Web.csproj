@@ -53,14 +53,17 @@
     <Reference Include="FinancialThing.Models">
       <HintPath>..\..\FT.Service\FinancialThing.Models\bin\Debug\FinancialThing.Models.dll</HintPath>
     </Reference>
+    <Reference Include="FinancialThing.Service.Utilities">
+      <HintPath>..\..\FT.Service\FinancialThing.Services\bin\FinancialThing.Service.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -200,6 +203,7 @@
     <Compile Include="DataAccess\CompanyRepository.cs" />
     <Compile Include="DataAccess\DataRepository.cs" />
     <Compile Include="DataAccess\DictionaryRepository.cs" />
+    <Compile Include="DataAccess\ExpandedCompanyRepository.cs" />
     <Compile Include="DataAccess\IndustryRepository.cs" />
     <Compile Include="DataAccess\RatioRepository.cs" />
     <Compile Include="DataAccess\RatioValueRepository.cs" />
@@ -212,15 +216,19 @@
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\CompanyCategoriesViewModel.cs" />
     <Compile Include="Models\CompanyViewModel.cs" />
+    <Compile Include="Models\DataCompanyViewModel.cs" />
+    <Compile Include="Models\DataItemViewModel.cs" />
     <Compile Include="Models\DataViewModel.cs" />
     <Compile Include="Models\ExchangeViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\StatementViewModel.cs" />
     <Compile Include="Models\IndustriesViewModel.cs" />
     <Compile Include="Models\RatioViewModel.cs" />
     <Compile Include="Models\SectorsAndIndustriesViewModel.cs" />
     <Compile Include="Models\SectorViewModel.cs" />
     <Compile Include="Models\SummaryViewModel.cs" />
     <Compile Include="Models\Toggle.cs" />
+    <Compile Include="Models\ValueViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -1191,6 +1199,11 @@
     <Content Include="Views\Summary\Index.cshtml" />
     <Content Include="Views\SectorsAndIndustries\Index.cshtml" />
     <Content Include="Scripts\version.json" />
+    <Content Include="Views\Data\Index2.cshtml" />
+    <Content Include="Views\Data\_Statement.cshtml" />
+    <Content Include="Views\Data\_BalanceSheet.cshtml" />
+    <Content Include="Views\Data\_Company.cshtml" />
+    <Content Include="Views\Data\_Data.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
